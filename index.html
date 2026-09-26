@@ -201,7 +201,29 @@
   .work-card{background:var(--card);border-radius:8px;overflow:hidden;box-shadow:0 0 0 1px var(--border-strong);
     transition:transform .25s ease,box-shadow .25s ease}
   .work-card:hover{transform:translateY(-4px);box-shadow:0 16px 32px rgba(0,0,0,0.35),0 0 0 1px var(--border-strong)}
-  .work-thumb{width:100%;height:220px}
+  /* Live site preview: a real iframe of the project, rendered at desktop width
+     and scaled down to fit the card. The whole preview is a link to the site. */
+  .work-preview{--pv-scale:0.3;position:relative;display:block;width:100%;height:240px;overflow:hidden;
+    background:linear-gradient(160deg,#2b2d3d,#1e202c);border-bottom:1px solid var(--border-strong)}
+  .work-preview iframe{position:absolute;top:0;left:0;width:1280px;height:820px;border:0;
+    transform:scale(var(--pv-scale));transform-origin:top left;pointer-events:none;
+    opacity:0;transition:opacity .6s ease}
+  .work-preview.is-loaded iframe{opacity:1}
+  /* Sits behind the frame until the site paints in. */
+  .work-preview-ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-faint);
+    transition:opacity .4s ease}
+  .work-preview.is-loaded .work-preview-ph{opacity:0}
+  /* Keeps the scaled-down text readable against the card and catches the click. */
+  .work-preview::after{content:"";position:absolute;inset:0;background:rgba(15,17,25,0.18);
+    transition:background .25s ease}
+  .work-card:hover .work-preview::after{background:rgba(15,17,25,0.02)}
+  .work-preview-badge{position:absolute;right:12px;bottom:12px;z-index:2;display:inline-flex;align-items:center;gap:7px;
+    padding:6px 12px;border-radius:999px;font-size:11px;letter-spacing:0.06em;color:var(--text-bright);
+    background:rgba(15,17,25,0.72);border:1px solid var(--border-strong);
+    -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+  .work-preview-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--accent-strong)}
+  .work-preview:focus-visible{outline:2px solid var(--accent-strong);outline-offset:-2px}
   .work-body{padding:26px}
   .work-body h3{font-size:19px;font-weight:500;color:var(--text);margin:0 0 8px}
   .work-body p{font-size:14px;color:var(--text-dim);margin:0 0 18px;line-height:1.6}
@@ -449,7 +471,14 @@
     </div>
     <div class="work-grid">
       <div class="work-card reveal">
-        <div class="img-slot img-slot--rect work-thumb">Obzidian Labs screenshot</div>
+        <a class="work-preview" href="https://dhirenpamnani.github.io/ObzidianLabs/" target="_blank" rel="noopener"
+           aria-label="Open Obzidian Labs in a new tab">
+          <span class="work-preview-ph">Obzidian Labs</span>
+          <iframe data-src="https://dhirenpamnani.github.io/ObzidianLabs/" title="Obzidian Labs live preview" tabindex="-1" scrolling="no"
+                  loading="lazy" referrerpolicy="no-referrer"
+                  sandbox="allow-scripts allow-same-origin"></iframe>
+          <span class="work-preview-badge"><span class="dot"></span>Live preview</span>
+        </a>
         <div class="work-body">
           <h3>Obzidian Labs</h3>
           <p>A showcase build exploring custom software and AI integration work end-to-end.</p>
@@ -459,7 +488,14 @@
         </div>
       </div>
       <div class="work-card reveal">
-        <div class="img-slot img-slot--rect work-thumb">PretextDemo screenshot</div>
+        <a class="work-preview" href="https://dhirenpamnani.github.io/PretextDemo/" target="_blank" rel="noopener"
+           aria-label="Open PretextDemo in a new tab">
+          <span class="work-preview-ph">PretextDemo</span>
+          <iframe data-src="https://dhirenpamnani.github.io/PretextDemo/" title="PretextDemo live preview" tabindex="-1" scrolling="no"
+                  loading="lazy" referrerpolicy="no-referrer"
+                  sandbox="allow-scripts allow-same-origin"></iframe>
+          <span class="work-preview-badge"><span class="dot"></span>Live preview</span>
+        </a>
         <div class="work-body">
           <h3>PretextDemo</h3>
           <p>An interactive demo prototype built to explore a product idea end-to-end.</p>
@@ -749,6 +785,45 @@
       mio.observe(stage);
     } else {
       load();
+    }
+  })();
+
+  // Live project previews: scale each iframe so the site renders at desktop
+  // width inside the card, and only load it once the card is near the viewport.
+  (function(){
+    var previews = [].slice.call(document.querySelectorAll('.work-preview'));
+    if (!previews.length) return;
+    var BASE = 1280;
+
+    function fit(){
+      previews.forEach(function(el){
+        el.style.setProperty('--pv-scale', (el.clientWidth / BASE).toFixed(4));
+      });
+    }
+
+    function load(el){
+      var frame = el.querySelector('iframe');
+      if (!frame || frame.src) return;
+      frame.addEventListener('load', function(){ el.classList.add('is-loaded'); });
+      frame.src = frame.getAttribute('data-src');
+    }
+
+    fit();
+    window.addEventListener('resize', fit);
+    if ('ResizeObserver' in window) {
+      var ro = new ResizeObserver(fit);
+      previews.forEach(function(el){ ro.observe(el); });
+    }
+
+    if ('IntersectionObserver' in window) {
+      var pio = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if (entry.isIntersecting) { pio.unobserve(entry.target); load(entry.target); }
+        });
+      }, { rootMargin: '400px 0px' });
+      previews.forEach(function(el){ pio.observe(el); });
+    } else {
+      previews.forEach(load);
     }
   })();
 
