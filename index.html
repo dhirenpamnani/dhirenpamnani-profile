@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dhiren Pamnani - Software Tech Lead</title>
+<meta name="description" content="Software Tech Lead specializing in AI integrations, .NET, Azure and SQL optimization. I help businesses build, improve, and scale software that actually works.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg:#161826;
+    --bg-alt:#1c1e2b;
+    --bg-about:#262a60;
+    --bg-footer:#0f1119;
+    --card:#232532;
+    --pill:#423a6a;
+    --pill-text:#f5f4ff;
+    --border:rgba(233,233,237,0.08);
+    --border-strong:#3f424d;
+    --text:#e9e9ed;
+    --text-bright:#f3f5fe;
+    --text-soft:#cfd3e5;
+    --text-dim:#b2b6ca;
+    --text-faint:#75798c;
+    --accent:#9184d9;
+    --accent-soft:#d2cefd;
+    --accent-strong:#b5abfc;
+    --accent-muted:#a7a1db;
+    --glass-blur:20px;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth;scroll-padding-top:84px}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{color:var(--accent-strong)}
+  ::selection{background:rgba(145,132,217,0.3)}
+  img{display:block;max-width:100%}
+  ul{list-style:none}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.001ms !important;animation-iteration-count:1 !important;transition-duration:0.001ms !important;scroll-behavior:auto !important}
+  }
+
+  @keyframes bounce{0%,100%{transform:translateY(0);opacity:.5}50%{transform:translateY(8px);opacity:1}}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+
+  /* ---------- Nav ---------- */
+  .nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;justify-content:space-between;
+    padding:18px 48px;background:rgba(22,24,38,0.55);backdrop-filter:blur(var(--glass-blur)) saturate(160%);
+    -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(160%);border-bottom:1px solid var(--border)}
+  .brand{font-weight:500;font-size:18px;color:var(--text);letter-spacing:-0.01em}
+  .brand:hover{color:var(--text)}
+  .nav-links{display:flex;align-items:center;gap:36px}
+  .nav-links a{color:var(--text-soft);font-size:14px}
+  .nav-links a:hover{color:var(--text-bright)}
+
+  .btn-pill{cursor:pointer;font-family:inherit;font-weight:500;font-size:13px;color:var(--text);
+    background:rgba(145,132,217,0.14);border:1px solid rgba(145,132,217,0.4);border-radius:999px;
+    padding:9px 20px;backdrop-filter:blur(var(--glass-blur));-webkit-backdrop-filter:blur(var(--glass-blur));
+    transition:background .25s ease,transform .25s ease,box-shadow .25s ease}
+  .btn-pill:hover{color:var(--text);background:rgba(145,132,217,0.24);transform:translateY(-1px);box-shadow:0 8px 20px rgba(145,132,217,0.18)}
+
+  .burger{display:none;cursor:pointer;background:transparent;border:1px solid rgba(233,233,237,0.2);
+    border-radius:8px;width:38px;height:38px;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+  .burger span{width:16px;height:1.5px;background:var(--text);transition:transform .25s ease,opacity .25s ease}
+  .burger[aria-expanded="true"] span:first-child{transform:translateY(2.75px) rotate(45deg)}
+  .burger[aria-expanded="true"] span:last-child{transform:translateY(-2.75px) rotate(-45deg)}
+
+  .mobile-menu{display:none;position:fixed;top:70px;right:20px;left:20px;z-index:49;
+    background:rgba(22,24,38,0.94);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+    border:1px solid rgba(233,233,237,0.1);border-radius:14px;padding:20px;flex-direction:column;gap:18px;
+    opacity:0;transform:translateY(-8px);pointer-events:none;transition:opacity .2s ease,transform .2s ease}
+  .mobile-menu a{color:var(--text);font-size:16px}
+  .mobile-menu a.accent{color:var(--accent)}
+  .mobile-menu.open{opacity:1;transform:translateY(0);pointer-events:auto}
+
+  @media (max-width:860px){
+    .nav{padding:16px 20px}
+    .nav-links{display:none}
+    .burger{display:flex}
+    .mobile-menu{display:flex}
+  }
+
+  /* ---------- Hero ---------- */
+  .hero{position:relative;min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;background:var(--bg)}
+  .hero-bg{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;
+    opacity:0;transition:opacity 1.2s ease}
+  .hero-bg.is-ready{opacity:1}
+  /* Keeps hero copy legible over the shader clouds */
+  .hero-scrim{position:absolute;inset:0;pointer-events:none;z-index:1;
+    background:radial-gradient(ellipse 70% 55% at 50% 45%, rgba(22,24,38,0.72), rgba(22,24,38,0.35) 55%, transparent 80%)}
+  .hero-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:820px;height:820px;
+    background:radial-gradient(circle, rgba(145,132,217,0.16), transparent 70%);filter:blur(10px);pointer-events:none;z-index:0}
+  .hero-inner{position:relative;z-index:2;text-align:center;padding:96px 24px 48px;max-width:900px;
+    animation:fadeUp .9s ease both}
+  .eyebrow{font-size:12px;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent-soft);margin-bottom:16px}
+  .hero-inner h1{font-weight:500;font-size:clamp(44px,7.5vw,104px);line-height:0.98;letter-spacing:-0.02em;
+    margin:0 0 20px;background:linear-gradient(180deg,var(--text-bright),var(--text-soft));
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero-lede{font-size:17px;line-height:1.55;color:var(--text-soft);max-width:560px;margin:0 auto 24px}
+  .hero-tags{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-bottom:28px}
+  .hero-tags span{font-size:12px;color:var(--text-dim);border:1px solid rgba(233,233,237,0.14);
+    border-radius:999px;padding:5px 14px}
+  .hero-ctas{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:20px}
+
+  .btn-glass{position:relative;overflow:hidden;cursor:pointer;font-family:inherit;font-weight:500;font-size:15px;
+    color:var(--text-bright);background:rgba(35,37,50,0.45);border:1px solid rgba(145,132,217,0.45);
+    border-radius:999px;padding:14px 30px;backdrop-filter:blur(var(--glass-blur)) saturate(180%);
+    -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(180%);box-shadow:0 10px 30px rgba(0,0,0,0.35);
+    display:inline-flex;align-items:center;gap:10px;transition:transform .3s ease,box-shadow .3s ease,background .3s ease}
+  .btn-glass::before{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,0.16) 50%,transparent 70%);
+    transform:translateX(-120%);transition:transform .6s ease}
+  .btn-glass:hover{color:var(--text-bright);background:rgba(50,53,72,0.6);transform:translateY(-2px);
+    box-shadow:0 14px 34px rgba(0,0,0,0.4),0 0 0 1px rgba(145,132,217,0.3)}
+  .btn-glass:hover::before{transform:translateX(120%)}
+  .btn-glass svg{transition:transform .3s ease}
+  .btn-glass:hover svg{transform:translateX(3px)}
+  .hero-say-hi{font-size:14px;color:var(--accent-soft)}
+
+  .scroll-cue{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);
+    animation:bounce 2s ease-in-out infinite;color:var(--text-faint)}
+
+  /* ---------- Section shells ---------- */
+  section, footer.contact{padding:120px 48px}
+  .wrap{max-width:1200px;margin:0 auto}
+  .head-block{max-width:560px;margin-bottom:48px}
+  .kicker{font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);margin-bottom:12px}
+  .head-block h2{font-size:36px;font-weight:500;color:var(--text);margin:0 0 12px;letter-spacing:-0.015em}
+  .head-block p{font-size:15px;color:var(--text-dim);margin:0}
+
+  @media (max-width:640px){
+    section, footer.contact{padding:80px 24px}
+  }
+
+  /* ---------- Image slot placeholder ---------- */
+  .img-slot{position:relative;display:flex;align-items:center;justify-content:center;text-align:center;
+    background:linear-gradient(160deg,#2b2d3d,#1e202c);border:1px dashed rgba(233,233,237,0.18);
+    color:var(--text-faint);font-size:12px;letter-spacing:0.03em}
+  .img-slot--rounded{border-radius:20px}
+  .img-slot--rect{border-radius:0}
+
+  /* ---------- About ---------- */
+  .about{background:var(--bg-about);position:relative;overflow:hidden}
+  .about::before{content:"";position:absolute;top:-120px;right:-120px;width:420px;height:420px;
+    background:radial-gradient(circle,rgba(53,59,128,0.9),transparent 70%);pointer-events:none}
+  .about .wrap{display:flex;flex-wrap:wrap;gap:64px;align-items:center;position:relative;z-index:1}
+  .about-portrait{width:240px;height:280px;flex:none}
+  .about-copy{flex:1;min-width:280px}
+  .about-copy p:first-of-type{font-size:22px;line-height:1.5;color:var(--text-bright);max-width:640px;margin:0 0 20px;font-weight:400}
+  .about-copy p:last-of-type{font-size:15px;line-height:1.7;color:var(--text-soft);max-width:600px;margin:0}
+  .about-stats{display:flex;gap:40px;flex-wrap:wrap}
+  .about-stats .num{font-size:44px;font-weight:500;color:var(--text-bright)}
+  .about-stats .label{font-size:13px;color:var(--accent-muted)}
+
+  /* ---------- Capabilities ---------- */
+  .capabilities-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
+  .cap-card{background:var(--card);border-radius:8px;padding:28px;display:flex;flex-direction:column;gap:14px;
+    transition:transform .25s ease,box-shadow .25s ease}
+  .cap-card:hover{transform:translateY(-4px);box-shadow:0 16px 32px rgba(0,0,0,0.3)}
+  .cap-icon{width:34px;height:34px;border:1px solid var(--accent);border-radius:8px;display:flex;
+    align-items:center;justify-content:center;color:var(--accent)}
+  .cap-label{font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent)}
+  .cap-card h3{font-size:18px;font-weight:500;color:var(--text);margin:0}
+  .cap-card ul{display:flex;flex-direction:column;gap:8px;font-size:13px;color:var(--text-dim)}
+
+  /* ---------- Skills ---------- */
+  .skills-row{display:flex;flex-wrap:wrap;gap:20px;align-items:baseline;border-top:1px solid var(--border);padding-top:20px}
+  .skills-row:last-child{border-bottom:1px solid var(--border);padding-bottom:20px}
+  .skills-col{display:flex;flex-direction:column;gap:28px}
+  .skills-label{width:140px;flex:none;font-size:12px;color:var(--text-dim);letter-spacing:0.06em;text-transform:uppercase}
+  .skills-tags{display:flex;flex-wrap:wrap;gap:8px}
+  .skills-tags span{background:var(--pill);color:var(--pill-text);font-size:12px;padding:6px 14px;border-radius:6px}
+
+  /* ---------- Work ---------- */
+  .work-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:28px}
+  .work-card{background:var(--card);border-radius:8px;overflow:hidden;box-shadow:0 0 0 1px var(--border-strong);
+    transition:transform .25s ease,box-shadow .25s ease}
+  .work-card:hover{transform:translateY(-4px);box-shadow:0 16px 32px rgba(0,0,0,0.35),0 0 0 1px var(--border-strong)}
+  .work-thumb{width:100%;height:220px}
+  .work-body{padding:26px}
+  .work-body h3{font-size:19px;font-weight:500;color:var(--text);margin:0 0 8px}
+  .work-body p{font-size:14px;color:var(--text-dim);margin:0 0 18px;line-height:1.6}
+  .work-link{display:inline-flex;align-items:center;gap:8px;font-size:14px;color:var(--accent)}
+  .work-link svg{transition:transform .25s ease}
+  .work-link:hover svg{transform:translate(2px,-2px)}
+
+  /* ---------- Process ---------- */
+  .process-list{display:flex;flex-direction:column}
+  .process-item{display:flex;gap:24px;padding:22px 0;border-top:1px solid rgba(233,233,237,0.1)}
+  .process-item:last-child{border-bottom:1px solid rgba(233,233,237,0.1)}
+  .process-num{width:40px;height:40px;flex:none;border:1px solid var(--accent);border-radius:50%;
+    display:flex;align-items:center;justify-content:center;color:var(--accent-soft);font-size:14px}
+  .process-item h3{font-size:17px;font-weight:500;color:var(--text);margin:0 0 6px}
+  .process-item p{font-size:14px;color:var(--text-dim);margin:0;max-width:560px}
+
+  /* ---------- Philosophy ---------- */
+  .philosophy{background:var(--bg);text-align:center}
+  .philosophy .wrap{max-width:820px}
+  .philosophy blockquote{font-size:clamp(24px,3.4vw,38px);line-height:1.4;font-weight:500;color:var(--text-bright);
+    margin:0 0 24px;letter-spacing:-0.01em}
+  .philosophy blockquote span{color:var(--accent)}
+  .philosophy p{font-size:15px;line-height:1.7;color:var(--text-dim);margin:0}
+
+  /* ---------- Books ---------- */
+  .books-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px}
+  .book-card{border-radius:8px;padding:20px;height:210px;display:flex;flex-direction:column;justify-content:space-between;
+    box-shadow:0 0 0 1px var(--border-strong);transition:transform .25s ease}
+  .book-card:hover{transform:translateY(-4px)}
+  .book-card.a{background:linear-gradient(160deg,#423a6a,#2b2741)}
+  .book-card.b{background:linear-gradient(160deg,#3f424d,#292b31)}
+  .book-tag{font-size:10px;letter-spacing:0.08em;text-transform:uppercase}
+  .book-card.a .book-tag{color:var(--accent-muted)}
+  .book-card.b .book-tag{color:var(--text-dim)}
+  .book-title{font-size:15px;font-weight:500;line-height:1.3}
+  .book-card.a .book-title{color:var(--text-bright)}
+  .book-card.b .book-title{color:var(--text-bright)}
+  .book-author{font-size:11px;margin-top:4px}
+  .book-card.a .book-author{color:var(--accent-muted)}
+  .book-card.b .book-author{color:var(--text-dim)}
+
+  /* ---------- Footer / Contact ---------- */
+  .contact{background:var(--bg-footer);padding:100px 48px 40px;position:relative;overflow:hidden}
+  .contact::before{content:"";position:absolute;bottom:-160px;left:-100px;width:420px;height:420px;
+    background:radial-gradient(circle,rgba(145,132,217,0.12),transparent 70%);pointer-events:none}
+  .contact .wrap{position:relative;z-index:1}
+  .contact-head{max-width:640px;margin-bottom:48px}
+  .contact-head h2{font-size:clamp(30px,4vw,48px);font-weight:500;color:var(--text-bright);margin:0 0 20px;letter-spacing:-0.02em}
+  .contact-head p{font-size:15px;color:var(--text-dim);line-height:1.7;margin:0 0 32px}
+  .contact-ctas{display:flex;flex-wrap:wrap;gap:16px}
+  .contact-ctas .btn-glass{background:rgba(35,37,50,0.6)}
+  .contact-tel{font-size:15px;color:var(--text-soft);display:inline-flex;align-items:center;padding:15px 6px}
+  .contact-tel:hover{color:var(--text-bright)}
+  .footer-bottom{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:16px;
+    border-top:1px solid rgba(233,233,237,0.1);padding-top:28px}
+  .copyright{font-size:13px;color:var(--text-faint)}
+  .footer-links{display:flex;gap:28px;flex-wrap:wrap}
+  .footer-links a{font-size:13px;color:var(--text-dim)}
+  .footer-links a:hover{color:var(--text-bright)}
+
+  /* ---------- Reveal on scroll ---------- */
+  .reveal{opacity:0;transform:translateY(24px);transition:opacity .7s ease,transform .7s ease}
+  .reveal.in-view{opacity:1;transform:translateY(0)}
+</style>
+</head>
+<body>
+
+<div style="position:relative;width:100%;background:var(--bg);overflow-x:hidden" id="top">
+
+<nav class="nav">
+  <a href="#top" class="brand">Dhiren Pamnani</a>
+  <div class="nav-links" id="navLinks">
+    <a href="#work">Work</a>
+    <a href="#skills">Skills</a>
+    <a href="#process">Process</a>
+    <a href="#books">Books</a>
+    <a href="#contact" class="btn-pill">Say Hello</a>
+  </div>
+  <button class="burger" id="burgerBtn" aria-label="Toggle menu" aria-expanded="false">
+    <span></span><span></span>
+  </button>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#work">Work</a>
+  <a href="#skills">Skills</a>
+  <a href="#process">Process</a>
+  <a href="#books">Books</a>
+  <a href="#contact" class="accent">Contact</a>
+</div>
+
+<section class="hero" data-screen-label="Hero">
+  <canvas class="hero-bg" id="heroCanvas" aria-hidden="true"></canvas>
+  <div class="hero-scrim"></div>
+  <div class="hero-glow"></div>
+
+  <div class="hero-inner">
+    <div class="eyebrow">Software Tech Lead · AI Integrations</div>
+    <h1>Dhiren<br>Pamnani</h1>
+    <p class="hero-lede">I don't just write code - I help businesses build, improve, and scale software that actually works.</p>
+    <div class="hero-tags">
+      <span>5+ Years Experience</span>
+      <span>30+ Projects Delivered</span>
+      <span>5+ Industries</span>
+    </div>
+    <div class="hero-ctas">
+      <a href="#work" class="btn-glass">View My Work
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+      </a>
+      <a href="#contact" class="hero-say-hi">or say hello →</a>
+    </div>
+  </div>
+
+  <div class="scroll-cue">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 4v16M6 14l6 6 6-6"></path></svg>
+  </div>
+</section>
+
+<section class="about" data-screen-label="About">
+  <div class="wrap">
+    <div class="img-slot img-slot--rounded about-portrait">Drop headshot photo</div>
+    <div class="about-copy">
+      <div class="kicker">About</div>
+      <p>I'm a Software Tech Lead with 5+ years of professional experience, working with a US-based organization — delivering 30+ projects across e-commerce, healthcare, finance, insurance, and custom business applications.</p>
+      <p>I take projects end-to-end: understanding the business requirement, designing the solution, developing, integrating, deploying, optimizing performance and security, and solving issues in production.</p>
+    </div>
+    <div class="about-stats">
+      <div><div class="num">5+</div><div class="label">Years</div></div>
+      <div><div class="num">30+</div><div class="label">Projects</div></div>
+      <div><div class="num">5</div><div class="label">Industries</div></div>
+    </div>
+  </div>
+</section>
+
+<section data-screen-label="What I Help With">
+  <div class="wrap">
+    <div class="head-block reveal">
+      <div class="kicker">Capabilities</div>
+      <h2>What I can help you with</h2>
+      <p>From AI opportunities to production-ready systems — practical help across the full stack.</p>
+    </div>
+    <div class="capabilities-grid">
+      <div class="cap-card reveal">
+        <div class="cap-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 3"></path></svg></div>
+        <div class="cap-label">AI &amp; Automation</div>
+        <h3>AI-powered products</h3>
+        <ul>
+          <li>AI integrations into existing applications</li>
+          <li>Claude / LLM integrations and setup</li>
+          <li>AI-powered features for websites and software</li>
+          <li>AI consultation and solution planning</li>
+        </ul>
+      </div>
+      <div class="cap-card reveal">
+        <div class="cap-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M3 9h18"></path></svg></div>
+        <div class="cap-label">Custom Software</div>
+        <h3>End-to-end applications</h3>
+        <ul>
+          <li>Custom business applications</li>
+          <li>Internal admin systems &amp; dashboards</li>
+          <li>E-commerce platforms &amp; payment integrations</li>
+          <li>REST APIs and backend systems</li>
+        </ul>
+      </div>
+      <div class="cap-card reveal">
+        <div class="cap-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 18a4 4 0 010-8 5 5 0 019.5-2 4.5 4.5 0 011.5 8.7"></path></svg></div>
+        <div class="cap-label">Cloud &amp; Performance</div>
+        <h3>Azure &amp; SQL optimization</h3>
+        <ul>
+          <li>Azure architecture and consultation</li>
+          <li>Azure cost / performance improvements</li>
+          <li>SQL Server &amp; query optimization</li>
+          <li>Production issue investigation</li>
+        </ul>
+      </div>
+      <div class="cap-card reveal">
+        <div class="cap-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l7 4v5c0 5-3.5 8-7 9-3.5-1-7-4-7-9V7z"></path></svg></div>
+        <div class="cap-label">Security</div>
+        <h3>Security reviews</h3>
+        <ul>
+          <li>Website &amp; application security reviews</li>
+          <li>Code security scans</li>
+          <li>Vulnerability identification</li>
+          <li>Actionable security reports</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="skills" style="background:var(--bg-alt)" data-screen-label="Technical Expertise">
+  <div class="wrap">
+    <div class="head-block reveal">
+      <div class="kicker">Stack</div>
+      <h2>Technical expertise</h2>
+    </div>
+    <div class="skills-col">
+      <div class="skills-row">
+        <div class="skills-label">Backend</div>
+        <div class="skills-tags">
+          <span>.NET / .NET Core</span>
+          <span>ASP.NET</span>
+          <span>C#</span>
+          <span>REST APIs</span>
+          <span>Python</span>
+          <span>Node.js</span>
+        </div>
+      </div>
+      <div class="skills-row">
+        <div class="skills-label">Frontend</div>
+        <div class="skills-tags">
+          <span>Angular</span>
+          <span>JavaScript</span>
+        </div>
+      </div>
+      <div class="skills-row">
+        <div class="skills-label">Cloud &amp; DevOps</div>
+        <div class="skills-tags">
+          <span>Microsoft Azure</span>
+          <span>GitLab CI/CD</span>
+          <span>Deployment Automation</span>
+        </div>
+      </div>
+      <div class="skills-row">
+        <div class="skills-label">Database</div>
+        <div class="skills-tags">
+          <span>SQL Server</span>
+          <span>Database Design</span>
+          <span>Query Optimization</span>
+          <span>Stored Procedures</span>
+        </div>
+      </div>
+      <div class="skills-row">
+        <div class="skills-label">AI</div>
+        <div class="skills-tags">
+          <span>Claude Integrations</span>
+          <span>LLM Applications</span>
+          <span>AI Workflows</span>
+          <span>AI Consulting</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="work" data-screen-label="Featured Projects">
+  <div class="wrap">
+    <div class="head-block reveal">
+      <div class="kicker">Work</div>
+      <h2>Selected projects</h2>
+    </div>
+    <div class="work-grid">
+      <div class="work-card reveal">
+        <div class="img-slot img-slot--rect work-thumb">Obzidian Labs screenshot</div>
+        <div class="work-body">
+          <h3>Obzidian Labs</h3>
+          <p>A showcase build exploring custom software and AI integration work end-to-end.</p>
+          <a href="https://dhirenpamnani.github.io/ObzidianLabs/" target="_blank" rel="noopener" class="work-link">View project
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"></path></svg>
+          </a>
+        </div>
+      </div>
+      <div class="work-card reveal">
+        <div class="img-slot img-slot--rect work-thumb">PretextDemo screenshot</div>
+        <div class="work-body">
+          <h3>PretextDemo</h3>
+          <p>An interactive demo prototype built to explore a product idea end-to-end.</p>
+          <a href="https://dhirenpamnani.github.io/PretextDemo/" target="_blank" rel="noopener" class="work-link">View project
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"></path></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="process" style="background:var(--bg-alt)" data-screen-label="How I Work">
+  <div class="wrap">
+    <div class="head-block reveal">
+      <div class="kicker">Process</div>
+      <h2>How I work</h2>
+    </div>
+    <div class="process-list">
+      <div class="process-item reveal">
+        <div class="process-num">01</div>
+        <div><h3>Understand</h3><p>Get on a call, understand the business problem, and map constraints.</p></div>
+      </div>
+      <div class="process-item reveal">
+        <div class="process-num">02</div>
+        <div><h3>Design</h3><p>Plan the architecture, technology, and implementation approach.</p></div>
+      </div>
+      <div class="process-item reveal">
+        <div class="process-num">03</div>
+        <div><h3>Build &amp; Integrate</h3><p>Develop, integrate and test — with end-to-end ownership.</p></div>
+      </div>
+      <div class="process-item reveal">
+        <div class="process-num">04</div>
+        <div><h3>Deploy &amp; Optimize</h3><p>Ship to production, tune performance and close security gaps.</p></div>
+      </div>
+      <div class="process-item reveal">
+        <div class="process-num">05</div>
+        <div><h3>Support &amp; Evolve</h3><p>Monitor, fix production issues, and plan the next iteration.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="philosophy" data-screen-label="Philosophy">
+  <div class="wrap reveal">
+    <blockquote>&ldquo;I bring a <span>technical leadership mindset</span>, not just development skills.&rdquo;</blockquote>
+    <p>Tell me what problem your business is trying to solve, and I'll help figure out the architecture, technology, and the most practical way to get it into production.</p>
+  </div>
+</section>
+
+<section id="books" style="background:var(--bg-alt)" data-screen-label="Books">
+  <div class="wrap">
+    <div class="head-block reveal">
+      <div class="kicker">Reading</div>
+      <h2>Books I've read</h2>
+      <p>Ideas that shaped how I think about building, leading, and shipping.</p>
+    </div>
+    <div class="books-grid">
+      <div class="book-card a reveal">
+        <div class="book-tag">Craft</div>
+        <div><div class="book-title">Clean Code</div><div class="book-author">Robert C. Martin</div></div>
+      </div>
+      <div class="book-card b reveal">
+        <div class="book-tag">Craft</div>
+        <div><div class="book-title">The Pragmatic Programmer</div><div class="book-author">Hunt &amp; Thomas</div></div>
+      </div>
+      <div class="book-card a reveal">
+        <div class="book-tag">Craft</div>
+        <div><div class="book-title">System Design Interview</div></div>
+      </div>
+      <div class="book-card b reveal">
+        <div class="book-tag">Habits</div>
+        <div><div class="book-title">Atomic Habits</div><div class="book-author">James Clear</div></div>
+      </div>
+      <div class="book-card a reveal">
+        <div class="book-tag">Leadership</div>
+        <div><div class="book-title">The One Minute Manager</div><div class="book-author">Blanchard &amp; Johnson</div></div>
+      </div>
+      <div class="book-card b reveal">
+        <div class="book-tag">Startups</div>
+        <div><div class="book-title">Zero to One</div><div class="book-author">Peter Thiel</div></div>
+      </div>
+      <div class="book-card a reveal">
+        <div class="book-tag">Startups</div>
+        <div><div class="book-title">The Lean Startup</div><div class="book-author">Eric Ries</div></div>
+      </div>
+      <div class="book-card b reveal">
+        <div class="book-tag">Mindset</div>
+        <div><div class="book-title">Think and Grow Rich</div><div class="book-author">Napoleon Hill</div></div>
+      </div>
+      <div class="book-card a reveal">
+        <div class="book-tag">Mindset</div>
+        <div><div class="book-title">Can't Hurt Me</div><div class="book-author">David Goggins</div></div>
+      </div>
+      <div class="book-card b reveal">
+        <div class="book-tag">Mindset</div>
+        <div><div class="book-title">The Secret</div><div class="book-author">Rhonda Byrne</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer id="contact" class="contact" data-screen-label="Contact">
+  <div class="wrap">
+    <div class="contact-head reveal">
+      <h2>Let's build something reliable.</h2>
+      <p>Have a software problem, an idea that needs building, or a system that needs improving? Let's talk.</p>
+      <div class="contact-ctas">
+        <a href="mailto:ObzidianLabs@gmail.com" class="btn-glass">ObzidianLabs@gmail.com</a>
+        <a href="tel:+918104506566" class="contact-tel">+91 81045 06566</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="copyright">© 2026 Dhiren Pamnani</div>
+      <div class="footer-links">
+        <a href="#work">Work</a>
+        <a href="#skills">Skills</a>
+        <a href="#books">Books</a>
+        <a href="https://github.com/dhirenpamnani" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</div>
+
+<script>
+(function(){
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Mobile nav toggle
+  var burger = document.getElementById('burgerBtn');
+  var mobileMenu = document.getElementById('mobileMenu');
+  burger.addEventListener('click', function(){
+    var open = mobileMenu.classList.toggle('open');
+    burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  mobileMenu.querySelectorAll('a').forEach(function(link){
+    link.addEventListener('click', function(){
+      mobileMenu.classList.remove('open');
+      burger.setAttribute('aria-expanded', 'false');
+    });
+  });
+
+  // Hero background: animated WebGL2 shader (drifting nebula clouds, site palette)
+  // Shader adapted from "made by Matthias Hurrle (@atzedent)", recolored to --accent.
+  (function(){
+    var canvas = document.getElementById('heroCanvas');
+    if (!canvas) return;
+
+    var gl = canvas.getContext('webgl2', { antialias: false, alpha: false });
+    if (!gl) return;  // no WebGL2 — hero keeps its flat bg + glow
+
+    var vertexSrc = [
+      '#version 300 es',
+      'precision highp float;',
+      'in vec4 position;',
+      'void main(){gl_Position=position;}'
+    ].join('\n');
+
+    var fragmentSrc = [
+      '#version 300 es',
+      'precision highp float;',
+      'out vec4 O;',
+      'uniform vec2 resolution;',
+      'uniform float time;',
+      '#define FC gl_FragCoord.xy',
+      '#define T time',
+      '#define R resolution',
+      '#define MN min(R.x,R.y)',
+      'float rnd(vec2 p){p=fract(p*vec2(12.9898,78.233));p+=dot(p,p+34.56);return fract(p.x*p.y);}',
+      'float noise(in vec2 p){vec2 i=floor(p),f=fract(p),u=f*f*(3.-2.*f);',
+      '  float a=rnd(i),b=rnd(i+vec2(1,0)),c=rnd(i+vec2(0,1)),d=rnd(i+1.);',
+      '  return mix(mix(a,b,u.x),mix(c,d,u.x),u.y);}',
+      'float fbm(vec2 p){float t=.0,a=1.;mat2 m=mat2(1.,-.5,.2,1.2);',
+      '  for(int i=0;i<5;i++){t+=a*noise(p);p*=2.*m;a*=.5;}return t;}',
+      'float clouds(vec2 p){float d=1.,t=.0;',
+      '  for(float i=.0;i<3.;i++){float a=d*fbm(i*10.+p.x*.2+.2*(1.+i)*p.y+d+i*i+p);',
+      '  t=mix(t,d,a);d=a;p*=2./(i+1.);}return t;}',
+      'void main(void){',
+      '  vec2 uv=(FC-.5*R)/MN,st=uv*vec2(2,1);',
+      '  vec3 col=vec3(0);',
+      '  float bg=clouds(vec2(st.x+T*.35,-st.y));',
+      '  uv*=1.-.3*(sin(T*.2)*.5+.5);',
+      '  for(float i=1.;i<12.;i++){',
+      '    uv+=.1*cos(i*vec2(.1+.01*i,.8)+i*i+T*.4+.1*uv.x);',
+      '    vec2 p=uv;',
+      '    float d=length(p);',
+      '    col+=.0015/d*(cos(sin(i)*vec3(1,2,3))+1.)*vec3(.72,.66,1.08);',
+      '    float b=noise(i+p+bg*1.731);',
+      '    col+=.002*b/length(max(p,vec2(b*p.x*.02,p.y)))*vec3(.62,.56,1.05);',
+      '    col=mix(col,vec3(bg*.075,bg*.065,bg*.16),d);',
+      '  }',
+      '  col+=vec3(.086,.094,.149);',  // --bg #161826, so the hero edges blend into the page
+      '  O=vec4(col,1);',
+      '}'
+    ].join('\n');
+
+    function compile(type, src){
+      var shader = gl.createShader(type);
+      gl.shaderSource(shader, src);
+      gl.compileShader(shader);
+      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        console.error('Hero shader compile error:', gl.getShaderInfoLog(shader));
+        gl.deleteShader(shader);
+        return null;
+      }
+      return shader;
+    }
+
+    var vs = compile(gl.VERTEX_SHADER, vertexSrc);
+    var fs = compile(gl.FRAGMENT_SHADER, fragmentSrc);
+    if (!vs || !fs) return;
+
+    var program = gl.createProgram();
+    gl.attachShader(program, vs);
+    gl.attachShader(program, fs);
+    gl.linkProgram(program);
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+      console.error('Hero shader link error:', gl.getProgramInfoLog(program));
+      return;
+    }
+
+    var buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,1,-1,-1,1,1,1,-1]), gl.STATIC_DRAW);
+    var position = gl.getAttribLocation(program, 'position');
+    gl.enableVertexAttribArray(position);
+    gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
+
+    var uResolution = gl.getUniformLocation(program, 'resolution');
+    var uTime = gl.getUniformLocation(program, 'time');
+
+    function resize(){
+      // Half-res on HiDPI screens — the shader is fill-rate heavy and it still reads clean.
+      var dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      var w = Math.max(1, Math.round(canvas.clientWidth * dpr));
+      var h = Math.max(1, Math.round(canvas.clientHeight * dpr));
+      if (canvas.width === w && canvas.height === h) return;
+      canvas.width = w;
+      canvas.height = h;
+      gl.viewport(0, 0, w, h);
+    }
+
+    function draw(seconds){
+      gl.useProgram(program);
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+      gl.uniform2f(uResolution, canvas.width, canvas.height);
+      gl.uniform1f(uTime, seconds);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    }
+
+    var frame = null;
+    var visible = true;
+    function loop(now){
+      resize();
+      draw(now * 1e-3);
+      frame = requestAnimationFrame(loop);
+    }
+
+    resize();
+    draw(0);
+    canvas.classList.add('is-ready');
+
+    if (reduceMotion) return;  // one static frame is enough
+
+    // Only burn GPU while the hero is actually on screen.
+    function start(){ if (frame === null) frame = requestAnimationFrame(loop); }
+    function stop(){ if (frame !== null) { cancelAnimationFrame(frame); frame = null; } }
+
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function(entries){
+        visible = entries[0].isIntersecting;
+        if (visible && !document.hidden) { start(); } else { stop(); }
+      }, { threshold: 0 }).observe(canvas);
+    }
+    document.addEventListener('visibilitychange', function(){
+      if (document.hidden || !visible) { stop(); } else { start(); }
+    });
+    window.addEventListener('resize', resize);
+    start();
+  })();
+
+  // Reveal-on-scroll
+  var revealEls = document.querySelectorAll('.reveal');
+  if ('IntersectionObserver' in window && !reduceMotion) {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in-view');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+    revealEls.forEach(function(el){ io.observe(el); });
+  } else {
+    revealEls.forEach(function(el){ el.classList.add('in-view'); });
+  }
+})();
+</script>
+
+</body>
+</html>

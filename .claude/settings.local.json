@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(chromium-cli --session hero)",
+      "Bash(npx --version)",
+      "Bash(node -e \"require.resolve\\('playwright'\\)\")"
+    ]
+  }
+}

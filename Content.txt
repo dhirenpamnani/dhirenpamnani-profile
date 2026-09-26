@@ -1,0 +1,67 @@
+Software Tech Lead | AI Integrations | .NET | Azure | SQL Optimization | Custom Software
+
+I don't just write code - I help businesses build, improve, and scale software that actually works.
+
+I’m a **Software Tech Lead with 5+ years of professional experience**, working with a US-based organization and having delivered **30+ projects across multiple industries**, including e-commerce, healthcare, finance, insurance, and custom business applications.
+
+I specialize in taking projects end-to-end  from understanding the business requirement and designing the solution, to development, integrations, deployment, performance optimization, security, and solving issues in production.
+
+# What I can help you with
+
+*AI & Automation*
+
+* AI integrations into existing applications
+* Claude / LLM integrations and setup
+* AI-powered features for websites and software
+* 3D websites with AI integrations
+* AI consultation and solution planning
+* Identifying practical AI opportunities within existing systems
+
+*Custom Software Development*
+
+* Custom business applications
+* Internal admin systems and dashboards
+* E-commerce platforms and payment integrations
+* REST APIs and backend systems
+* Enterprise application development
+* New feature development and system redesign
+
+*Cloud & Performance*
+
+* Azure architecture and consultation
+* Azure optimization and cost/performance improvements
+* SQL Server performance optimization
+* Query and stored procedure optimization
+* Database design and performance troubleshooting
+* Production issue investigation and resolution
+
+*Security*
+
+* Website and application security reviews
+* Code security scans
+* Identifying vulnerabilities and potential risks
+* Detailed security reports with actionable recommendations
+
+# Technical Expertise
+
+**Backend:** .NET, .NET Framework, .NET Core, ASP.NET, REST APIs, C#, Python, Node.js
+
+**Frontend:** Angular, JavaScript and modern web technologies
+
+**Cloud & DevOps:** Microsoft Azure, GitLab CI/CD pipelines, deployment automation
+
+**Database:** Microsoft SQL Server, database design, query optimization, stored procedure optimization and performance tuning
+
+**AI:** Claude integrations, LLM-based applications, AI workflows and AI solution consulting
+
+# Why clients work with me
+
+I bring a **technical leadership mindset**, not just development skills.
+
+Throughout my experience, I've worked directly with projects from initial estimation and system design through development and production deployment. I've also been responsible for **live production troubleshooting, performance improvements, code reviews, feature planning, technical estimations, and recommending improvements to customers.**
+
+You can tell me **what problem your business is trying to solve**, and I can help you figure out the architecture, technology, implementation approach, and the most practical way to get it into production.
+
+Whether you need someone to **build a new application, integrate AI into an existing product, optimize a slow SQL database, improve an Azure environment, fix a difficult production issue, or review the security of your application**, I can step in and help from both a development and technical leadership perspective.
+
+**If you have a software problem, an idea that needs to be built, or an existing system that needs to be improved - let's turn it into something reliable, scalable, and production-ready.**
