@@ -157,6 +157,26 @@
   .about-stats .num{font-size:44px;font-weight:500;color:var(--text-bright)}
   .about-stats .label{font-size:13px;color:var(--accent-muted)}
 
+  /* ---------- About: interactive 3D logo ---------- */
+  .model-stage{position:relative;width:340px;height:300px;flex:none;border-radius:20px;overflow:hidden;
+    border:1px solid var(--border);background:radial-gradient(circle at 50% 40%,#151831,#0b0d1a 72%);
+    box-shadow:0 24px 48px rgba(8,9,20,0.45),inset 0 1px 0 rgba(255,255,255,0.06)}
+  /* No poster image: the card holds its own until the model itself fades in. */
+  .model-stage model-viewer{display:block;width:100%;height:100%;background-color:transparent;
+    --progress-bar-color:var(--accent);--progress-bar-height:2px;
+    opacity:0;transition:opacity .6s ease}
+  .model-stage.is-live model-viewer{opacity:1}
+  /* Only shown once the model is actually live and draggable. */
+  .model-hint{position:absolute;left:0;right:0;bottom:14px;text-align:center;pointer-events:none;
+    font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-faint);
+    opacity:0;transition:opacity .5s ease}
+  .model-stage.is-live .model-hint{opacity:1}
+  .model-stage.is-live.is-touched .model-hint{opacity:0}
+
+  @media (max-width:640px){
+    .model-stage{width:100%;max-width:320px;height:300px;margin:0 auto}
+  }
+
   /* ---------- Capabilities ---------- */
   .capabilities-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
   .cap-card{background:var(--card);border-radius:8px;padding:28px;display:flex;flex-direction:column;gap:14px;
@@ -285,7 +305,18 @@
 
 <section id="about" class="about" data-screen-label="About">
   <div class="wrap">
-    <div class="img-slot img-slot--rounded about-portrait">Drop headshot photo</div>
+    <div class="model-stage" id="logoStage">
+      <model-viewer
+        src="Images/3DLogo/logo-3d.glb"
+        alt="Interactive 3D model of the Dhiren Pamnani logo. Drag to rotate it."
+        camera-controls touch-action="pan-y" disable-zoom disable-pan
+        auto-rotate auto-rotate-delay="1200" rotation-per-second="20deg"
+        interaction-prompt="none"
+        camera-orbit="12deg 82deg 96%" min-camera-orbit="auto 0deg 96%" max-camera-orbit="auto 180deg 96%"
+        field-of-view="32deg" environment-image="neutral" exposure="1.05" shadow-intensity="0">
+      </model-viewer>
+      <span class="model-hint">Drag to rotate</span>
+    </div>
     <div class="about-copy">
       <div class="kicker">About</div>
       <p>I'm a Software Tech Lead with 5+ years of professional experience, working with a US-based organization — delivering 30+ projects across e-commerce, healthcare, finance, insurance, and custom business applications.</p>
@@ -658,6 +689,67 @@
     });
     window.addEventListener('resize', resize);
     start();
+  })();
+
+  // About: interactive 3D logo.
+  // <model-viewer> is ~1MB, so the bundle is only fetched once the About section
+  // is close to the viewport. Until it resolves the card sits empty rather than
+  // flashing a stand-in image, and the model fades in when it is ready.
+  (function(){
+    var stage = document.getElementById('logoStage');
+    if (!stage) return;
+
+    var viewer = stage.querySelector('model-viewer');
+
+    // The GLB exporter dropped the material colours, so repaint them once the model
+    // is in memory. Every blue part -- swoosh, brackets, slash, streaks -- is the
+    // site's --bg-about navy; no emissive, so the shapes read from shading alone
+    // against the near-black card. Tweak these and the exposure attribute to restyle.
+    var NAVY = '#262a60';
+    var PALETTE = {
+      brushed_silver: { base: '#e8e9e4', emissive: '#000000', metallic: 0.4,  roughness: 0.35 },
+      electric_blue:  { base: NAVY,      emissive: '#000000', metallic: 0.15, roughness: 0.45 },
+      neon_cyan:      { base: NAVY,      emissive: '#000000', metallic: 0.15, roughness: 0.45 }
+    };
+
+    viewer.addEventListener('load', function(){
+      stage.classList.add('is-live');
+      viewer.model.materials.forEach(function(material){
+        var spec = PALETTE[material.name];
+        if (!spec) return;
+        material.pbrMetallicRoughness.setBaseColorFactor(spec.base);
+        material.pbrMetallicRoughness.setMetallicFactor(spec.metallic);
+        material.pbrMetallicRoughness.setRoughnessFactor(spec.roughness);
+        material.setEmissiveFactor(spec.emissive);
+      });
+    });
+
+    // Drop the "Drag to rotate" nudge once they have.
+    ['pointerdown', 'touchstart', 'keydown'].forEach(function(type){
+      stage.addEventListener(type, function(){ stage.classList.add('is-touched'); }, { once: true });
+    });
+
+    var requested = false;
+    function load(){
+      if (requested) return;
+      requested = true;
+      if (reduceMotion) viewer.removeAttribute('auto-rotate');
+      // type=module: browsers too old to run it simply leave the card empty.
+      var tag = document.createElement('script');
+      tag.type = 'module';
+      tag.src = 'vendor/model-viewer/model-viewer.min.js';
+      tag.onerror = function(){ stage.classList.remove('is-live'); };  // card stays empty
+      document.head.appendChild(tag);
+    }
+
+    if ('IntersectionObserver' in window) {
+      var mio = new IntersectionObserver(function(entries){
+        if (entries[0].isIntersecting) { mio.disconnect(); load(); }
+      }, { rootMargin: '500px 0px' });
+      mio.observe(stage);
+    } else {
+      load();
+    }
   })();
 
   // Reveal-on-scroll
