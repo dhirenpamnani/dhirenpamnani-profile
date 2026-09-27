@@ -8,7 +8,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
 
 <style>
   :root{
@@ -204,7 +204,9 @@
   /* Live site preview: a real iframe of the project, rendered at desktop width
      and scaled down to fit the card. The whole preview is a link to the site. */
   .work-preview{--pv-scale:0.3;position:relative;display:block;width:100%;height:240px;overflow:hidden;
-    background:linear-gradient(160deg,#2b2d3d,#1e202c);border-bottom:1px solid var(--border-strong)}
+    background:linear-gradient(160deg,#2b2d3d,#1e202c);border-bottom:1px solid var(--border-strong);
+    /* Scopes the scaled 1280x820 frame's paint/layout work to this card. */
+    contain:layout paint}
   .work-preview iframe{position:absolute;top:0;left:0;width:1280px;height:820px;border:0;
     transform:scale(var(--pv-scale));transform-origin:top left;pointer-events:none;
     opacity:0;transition:opacity .6s ease}
@@ -214,14 +216,25 @@
     font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-faint);
     transition:opacity .4s ease}
   .work-preview.is-loaded .work-preview-ph{opacity:0}
+  /* Suspended = the card is well clear of the viewport. These previews are
+     same-origin, so Chrome does NOT throttle their render loops when they scroll
+     out of view: measured, they keep ticking at a full 60fps, and neither
+     display:none nor visibility:hidden stops them. content-visibility:hidden does
+     - it skips the subtree, which parks every rAF loop inside the frame without
+     unloading it, so the preview resumes exactly where it left off. The card's own
+     gradient still paints, so there is nothing to see even mid-transition.
+     Browsers without content-visibility just keep the old always-live behaviour. */
+  .work-preview.is-suspended{content-visibility:hidden}
   /* Keeps the scaled-down text readable against the card and catches the click. */
   .work-preview::after{content:"";position:absolute;inset:0;background:rgba(15,17,25,0.18);
     transition:background .25s ease}
   .work-card:hover .work-preview::after{background:rgba(15,17,25,0.02)}
   .work-preview-badge{position:absolute;right:12px;bottom:12px;z-index:2;display:inline-flex;align-items:center;gap:7px;
     padding:6px 12px;border-radius:999px;font-size:11px;letter-spacing:0.06em;color:var(--text-bright);
-    background:rgba(15,17,25,0.72);border:1px solid var(--border-strong);
-    -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+    /* No backdrop-filter here on purpose: this badge sits directly over a live
+       iframe, so a blur would be re-captured on every frame that iframe paints.
+       The fill is nearly opaque instead, which reads the same. */
+    background:rgba(15,17,25,0.86);border:1px solid var(--border-strong)}
   .work-preview-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--accent-strong)}
   .work-preview:focus-visible{outline:2px solid var(--accent-strong);outline-offset:-2px}
   .work-body{padding:26px}
@@ -594,7 +607,11 @@
     var canvas = document.getElementById('heroCanvas');
     if (!canvas) return;
 
-    var gl = canvas.getContext('webgl2', { antialias: false, alpha: false });
+    // failIfMajorPerformanceCaveat: if the only WebGL2 on offer is a software
+    // renderer, this shader would pin the CPU. Take the flat fallback instead.
+    var gl = canvas.getContext('webgl2', {
+      antialias: false, alpha: false, failIfMajorPerformanceCaveat: true
+    });
     if (!gl) return;  // no WebGL2 — hero keeps its flat bg + glow
 
     var vertexSrc = [
@@ -682,15 +699,21 @@
       var dpr = Math.min(window.devicePixelRatio || 1, 1.5);
       var w = Math.max(1, Math.round(canvas.clientWidth * dpr));
       var h = Math.max(1, Math.round(canvas.clientHeight * dpr));
-      if (canvas.width === w && canvas.height === h) return;
+      if (canvas.width === w && canvas.height === h) return false;
       canvas.width = w;
       canvas.height = h;
       gl.viewport(0, 0, w, h);
+      return true;
     }
 
+    // Nothing else shares this context, so the program and buffer binding are
+    // set once here rather than re-issued on every frame.
+    gl.useProgram(program);
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+
+    var lastFrameSeconds = 0;
     function draw(seconds){
-      gl.useProgram(program);
-      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+      lastFrameSeconds = seconds;
       gl.uniform2f(uResolution, canvas.width, canvas.height);
       gl.uniform1f(uTime, seconds);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -698,10 +721,18 @@
 
     var frame = null;
     var visible = true;
+    var lastDraw = -1e9;
+    // The clouds drift slowly (T*.35), so 30fps is indistinguishable from 60 here
+    // and halves the fill rate of a shader running about 30 noise() calls per pixel.
+    // The 4ms of slack matters: without it, vsync jitter pushes a frame just past
+    // the cutoff, that frame is skipped, and the rate collapses to 20fps.
+    var MIN_FRAME_MS = 1000 / 30 - 4;
+
     function loop(now){
-      resize();
-      draw(now * 1e-3);
       frame = requestAnimationFrame(loop);
+      if (now - lastDraw < MIN_FRAME_MS) return;
+      lastDraw = now;
+      draw(now * 1e-3);
     }
 
     resize();
@@ -723,7 +754,19 @@
     document.addEventListener('visibilitychange', function(){
       if (document.hidden || !visible) { stop(); } else { start(); }
     });
-    window.addEventListener('resize', resize);
+
+    // Size tracking used to sit inside the rAF loop, where reading clientWidth
+    // forced a style + layout flush every frame. A ResizeObserver reports the same
+    // changes for free, and repaints once if the canvas resizes while stopped.
+    function onResize(){
+      if (resize() && frame === null) draw(lastFrameSeconds);
+    }
+    if ('ResizeObserver' in window) {
+      new ResizeObserver(onResize).observe(canvas);
+    } else {
+      window.addEventListener('resize', onResize);
+    }
+
     start();
   })();
 
@@ -790,22 +833,56 @@
 
   // Live project previews: scale each iframe so the site renders at desktop
   // width inside the card, and only load it once the card is near the viewport.
+  //
+  // Each preview is a whole site with its own render loops (a WebGL shader plus a
+  // frame-sequence canvas in one, per-character physics in the other). They are
+  // same-origin, so Chrome does not throttle them once they scroll out of view --
+  // they kept running at a full 60fps for the rest of the session, which is what
+  // made everything past the Work section crawl. So each card gets an is-suspended
+  // class once it is well clear of the viewport (see the CSS for how that parks the
+  // frame) and loses it again before the card comes back into view.
   (function(){
     var previews = [].slice.call(document.querySelectorAll('.work-preview'));
     if (!previews.length) return;
     var BASE = 1280;
 
+    // Read every width first, then write every scale: interleaving them made each
+    // ResizeObserver pass force a fresh layout per card.
     function fit(){
-      previews.forEach(function(el){
-        el.style.setProperty('--pv-scale', (el.clientWidth / BASE).toFixed(4));
+      var scales = previews.map(function(el){
+        return (el.clientWidth / BASE).toFixed(4);
       });
+      previews.forEach(function(el, i){
+        el.style.setProperty('--pv-scale', scales[i]);
+      });
+    }
+
+    // One preview boots at a time. Two sites of this weight starting together
+    // spiked hard enough to stall the very scroll that triggered them.
+    var queue = [];
+    var booting = false;
+
+    function next(){
+      if (booting || !queue.length) return;
+      var el = queue.shift();
+      var frame = el.querySelector('iframe');
+      if (!frame) { next(); return; }
+      booting = true;
+      frame.addEventListener('load', function(){
+        el.classList.add('is-loaded');
+        // It may have scrolled away while it was loading.
+        if (el.pvOffscreen) el.classList.add('is-suspended');
+        booting = false;
+        next();
+      }, { once: true });
+      frame.src = frame.getAttribute('data-src');
     }
 
     function load(el){
       var frame = el.querySelector('iframe');
-      if (!frame || frame.src) return;
-      frame.addEventListener('load', function(){ el.classList.add('is-loaded'); });
-      frame.src = frame.getAttribute('data-src');
+      if (!frame || frame.src || queue.indexOf(el) !== -1) return;
+      queue.push(el);
+      next();
     }
 
     fit();
@@ -816,11 +893,19 @@
     }
 
     if ('IntersectionObserver' in window) {
+      // Stays observing for the life of the page now, to suspend and resume.
       var pio = new IntersectionObserver(function(entries){
         entries.forEach(function(entry){
-          if (entry.isIntersecting) { pio.unobserve(entry.target); load(entry.target); }
+          var el = entry.target;
+          el.pvOffscreen = !entry.isIntersecting;
+          if (entry.isIntersecting) {
+            el.classList.remove('is-suspended');
+            load(el);
+          } else if (el.classList.contains('is-loaded')) {
+            el.classList.add('is-suspended');
+          }
         });
-      }, { rootMargin: '400px 0px' });
+      }, { rootMargin: '600px 0px' });
       previews.forEach(function(el){ pio.observe(el); });
     } else {
       previews.forEach(load);
